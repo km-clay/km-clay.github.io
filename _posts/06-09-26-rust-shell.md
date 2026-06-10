@@ -24,6 +24,7 @@ date: 2026-06-09
   * setter functions
   * a query function that plugs directly into the main `ShOpt` struct's query method
   * a function that returns a source-able set of shell commands to construct the group's default state, used in the default `shedrc` file.
+
   That procedural macro alone probably saves more than 2000 lines of code, and makes the `shopt` system in general extremely easy to maintain. On top of this, both the POSIX compliance test suite and the line editor's test suite both use macros that very cleanly generate entire `#[test]` functions from a single line.
 
   As for what has been made difficult by the decision to use Rust, it's a usual suspect of programming in Rust: global state management. There are many ways to approach this problem, and I have tackled it in many different ways throughout the project's lifespan. Originally, state was tracked by a single struct that exists at the top level, and is threaded through the function signature of *nearly every function in the codebase* as a mutable borrow. This does have the nice effect of having the compiler enforce borrowing rules, but I found it to be far too restrictive.
