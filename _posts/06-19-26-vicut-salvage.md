@@ -155,7 +155,7 @@ qls() {
 		| __emit_sqr -n
 }
 ```
-  It also uses GNU `ls` now for portability. The `--lines` flag makes `vice` execute the given editor commands per-line instead of once on the entire buffer, which is a perfect fit for translating tabular data into SQR. Not only does it simplify this function, it's also a hell of a lot faster. Instead of doing a `read` loop over the lines we get from `ls`, `vice` performs its own internal loop over those lines. This, coupled with a recent optimization that saves forks in builtin-heavy pipelines, causes the runtime to drop from *75ms* to render the table, to just *13ms*:
+  It also uses GNU `ls` now for portability. The `--lines` flag makes `vice` execute the given editor commands per-line instead of once on the entire buffer, which is a perfect fit for translating tabular data into SQR. Not only does it simplify this function, it's also a hell of a lot faster. Instead of doing a `read` loop over the lines we get from `ls`, `vice` performs its own internal loop over those lines. This, coupled with a recent [optimization](https://github.com/km-clay/shed/commit/3da01033fb121f26dacdcf8affd3f5d821b5c905) that saves forks in builtin-heavy pipelines, causes the runtime to drop from *75ms* to render the table, to just *13ms*:
 ```bash
 $ time qls
 ╭────────────────────────┬───────────┬──────────┬──────────────┬────────────╮
