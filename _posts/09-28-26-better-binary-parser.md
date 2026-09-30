@@ -109,7 +109,7 @@ write_wav() {
     defer rm thbgm.fmt
     total=0
     for dir in ~/media/games/touhou/*; do
-        declare dat bgm
+        declare dat= bgm=
         for file in "$dir"/*; do
             # get the game and music .dat files
             if [[ "$file" =~ .*/th[0-9]{2}.dat ]]; then
@@ -130,7 +130,7 @@ write_wav() {
         $THDAT -xd "$dat" thbgm.fmt
         stat thbgm.fmt
         dir_total=$(parse_fmt thbgm.fmt | write_wav "$bgm" "$dir")
-        let total=total+dir_total
+        total=$(( total + dir_total ))
     done
 
     echo "done"
@@ -192,13 +192,10 @@ thru -T 16 | {
 I also had the idea to allow the `push` builtin to receive input from stdin, basically taking the input stream and pushing it to the array. The name field loop finally arrives at this:
 
 ```sh
-thru -T 16 | {
-    # name, null terminated
-    thru --until $'\0' | push data
-}
+thru -T 16 | thru --until $'\0' | push data
 ```
 
-A single line of code to express "read a null terminated string from raw binary input, and then push it to the 'data' array". `thru` ended up getting a handful more flags besides just this, based on the requirements of this script, but I won't go into too much detail since they aren't used directly in the script. The only relevant thing there is that `-L`/`--limit` was renamed to `-T`/`--take`.
+A single line of code to express "read a null terminated string from an input of exactly 16 raw bytes, and then push it to the 'data' array". `thru` ended up getting a handful more flags besides just this, based on the requirements of this script, but I won't go into too much detail since they aren't used directly in the script. The only relevant thing there is that `-L`/`--limit` was renamed to `-T`/`--take`.
 
 The next thing that kind of smelled was the way I was handling integers:
 
@@ -295,6 +292,7 @@ Every one of these additions came out of basically the same loop:
 1. Find a spot where the script felt like it was fighting the shell
 2. Realize `shed` is simply missing a specific primitive operation
 3. Add the primitive as a builtin, or extend an existing builtin
+
 Each time, whole stretches of the script would collapse into a single line.
 
 I don't mean to overclaim off a single project, but doing this kind of work in a shell, cleanly (and quickly, 5.2GB extracted and written across all 13 games in under two seconds!), feels like a bit more than just a novelty. I'll wait to see it hold up on a few more problems before I make a real case for it, but I think there is a case to be made.
