@@ -343,37 +343,37 @@ N = 10000 files, release build, timed with chrono timer
 
 A. batched (one invocation, N operands)
 ╭────────────────────────────────┬────────┬───────────────╮
-│                        command │ micros │ micros_per_op │
+│ command                        │ micros │ micros_per_op │
 ├────────────────────────────────┼────────┼───────────────┤
-│         fs truncate 0 "$W"/w/* │  28530 │             2 │
-│ command truncate -s 0 "$W"/w/* │  34282 │             3 │
+│ fs truncate 0 "$W"/w/*         │ 28802  │ 2             │
+│ command truncate -s 0 "$W"/w/* │ 38669  │ 3             │
 ╰────────────────────────────────┴────────┴───────────────╯
 
 B. per-file loop
 ╭────────────────────────────────────────────────────────┬─────────┬───────────────╮
-│                                                command │  micros │ micros_per_op │
+│ command                                                │ micros  │ micros_per_op │
 ├────────────────────────────────────────────────────────┼─────────┼───────────────┤
-│         for f in "$W"/w/*; do fs truncate 0 "$f"; done │   40095 │             4 │
-│ for f in "$W"/w/*; do command truncate -s 0 "$f"; done │ 8872367 │           887 │
+│ for f in "$W"/w/*; do fs truncate 0 "$f"; done         │ 40002   │ 4             │
+│ for f in "$W"/w/*; do command truncate -s 0 "$f"; done │ 9312560 │ 931           │
 ╰────────────────────────────────────────────────────────┴─────────┴───────────────╯
 
 C. unbatchable (rename each to $f.bak)
 ╭──────────────────────────────────────────────────────┬─────────┬───────────────╮
-│                                              command │  micros │ micros_per_op │
+│ command                                              │ micros  │ micros_per_op │
 ├──────────────────────────────────────────────────────┼─────────┼───────────────┤
-│  for f in "$W"/w/*; do fs rename "$f" "$f.bak"; done │   76724 │             7 │
-│ for f in "$W"/w/*; do command mv "$f" "$f.bak"; done │ 9401601 │           940 │
+│ for f in "$W"/w/*; do fs rename "$f" "$f.bak"; done  │ 78459   │ 7             │
+│ for f in "$W"/w/*; do command mv "$f" "$f.bak"; done │ 9969773 │ 996           │
 ╰──────────────────────────────────────────────────────┴─────────┴───────────────╯
 
 D. shell loop overhead alone (no filesystem work)
 ╭───────────────────────────────┬────────┬───────────────╮
-│                       command │ micros │ micros_per_op │
+│ command                       │ micros │ micros_per_op │
 ├───────────────────────────────┼────────┼───────────────┤
-│ for f in "$W"/w/*; do :; done │   8350 │             0 │
+│ for f in "$W"/w/*; do :; done │ 8328   │ 0             │
 ╰───────────────────────────────┴────────┴───────────────╯
 
 ratios:
-A: 1x   B: 221x     C: 122x
+A: 1x   B: 232x     C: 127x
 ```
 
 Which is kind of to be expected since the real bottleneck is fork overhead. The script used to run this benchmark can be found [here](https://gist.github.com/km-clay/75df463161c4c890d5243f94abffe078) (it uses `chrono` for the benchmarks!).
@@ -382,6 +382,6 @@ As I've stated in some of the more recent blog posts, my main idea for `shed`'s 
 
 There is, naturally, a tradeoff that comes with having an interface with a surface this wide; `shed` as of right now has 95 builtin commands and 33 subcommands, so a total of **128** builtin commands if we're counting all implementors of the `Builtin` trait. That is a significant maintenance burden. I'd like to think that the framework I designed will continue holding up as the shell is continuously extended, but as with all things in software engineering, you just never really know.
 
-There's also the fact that `shed` is still a young program and several of its builtins are actual novelties, like `vice`, or `forget` for instance. In such circumstances, bugs could be hiding really anywhere, and testing these builtins is not as easy as testing something like `printf`, where the objectively correct behaviors have been documented in great detail for several decades.
+There's also the fact that `shed` is still a young program and several of its builtins are actual novelties, like `vice`, or `forget` for instance. In such circumstances, bugs could be hiding really anywhere, and testing these builtins is not as straightforward as testing something like `printf`, that has actual decades worth of discovered footguns and extremely detailed documentation.
 
 Overall, the past few patches have improved `shed`'s independence quite significantly. The program is actually (fairly swiftly) approaching a state where it could reasonably bootstrap its own userland. The scripting language is pretty much complete at this point in my opinion, I think all that's really left for now is just exposing more of the OS' interface. There is a limit to how far we can reasonably go with this since `shed` has no way to represent pointers, but I feel like the hard limit is still pretty far away.
