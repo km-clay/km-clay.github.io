@@ -313,9 +313,9 @@ ccp() {
 }
 ```
 
-Note that this entire function is composed entirely of `shed` builtins.
+Note that this entire function is *also* composed entirely of `shed` builtins, like the `chrono` backup sheduler.
 
-It can just do this, out of the box, with ***zero dependence on the environment***. The only requirement for running this script is having the `shed` binary on your computer. This has many implications, but perhaps the most important is *portability*. Take a look at this line from the function:
+The shell can just do this, out of the box, with ***zero dependence on the environment***. The only requirement for running this script is having the `shed` binary on your computer. This has many implications, but perhaps the most important is *portability*. Take a look at this line from the function:
 
 ```sh
 local bs=$(stat -f "$dest" -c '%S')
